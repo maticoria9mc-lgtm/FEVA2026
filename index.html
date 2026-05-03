@@ -49,6 +49,7 @@
 
 <div id="app" class="auth-hidden">
 
+  <!-- ================= NAVEGACIÓN LATERAL ================= -->
   <nav id="sidebar" onmouseenter="sidebarHover(true)" onmouseleave="sidebarHover(false)">
     <div class="sidebar-logo-area">
       <img src="https://firebasestorage.googleapis.com/v0/b/dashboard-seleccion.firebasestorage.app/o/FeVA%20vertical%20colores%20y%20sombras.png?alt=media&token=77913fe1-f3f0-47d2-b1a4-d4045f60b2c0" class="sidebar-logo-img" alt="SAV" onerror="this.outerHTML='<div style=\'width:36px;height:36px;border-radius:50%;background:var(--celeste);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;flex-shrink:0\'>🏐</div>'">
@@ -62,9 +63,10 @@
       <div class="nav-item" data-panel="ent-dia" onclick="switchPanel('ent-dia',this)"><span class="nav-icon">📅</span><span class="nav-label">Día a Día</span></div>
       <div class="nav-item" data-panel="entrenamiento" onclick="switchPanel('entrenamiento',this)"><span class="nav-icon">🏐</span><span class="nav-label">Entrenamiento</span></div>
       <div class="nav-item" data-panel="partidos" onclick="switchPanel('partidos',this)"><span class="nav-icon">📊</span><span class="nav-label">Partidos</span></div>
-      <div class="nav-item" data-panel="fisico" onclick="switchPanel('fisico',this)"><span class="nav-icon">🏋️</span><span class="nav-label">Prep. Física</span></div>
+      <div class="nav-item" data-panel="fisico" onclick="switchPanel('fisico',this)"><span class="nav-icon">💪</span><span class="nav-label">Prep. Física</span></div>
       <div class="nav-item" data-panel="kinesiologia" onclick="switchPanel('kinesiologia',this)"><span class="nav-icon">🛠️</span><span class="nav-label">Kinesiología</span></div>
       <div class="nav-item" data-panel="perfil" onclick="switchPanel('perfil',this)"><span class="nav-icon">👤</span><span class="nav-label">Perfil Individual</span></div>
+      <div class="nav-item" onclick="planAbrirModal()"><span class="nav-icon">📝</span><span class="nav-label">Planificación</span></div>
     </div>
 
     <div class="sidebar-bottom">
@@ -75,6 +77,7 @@
     </div>
   </nav>
 
+  <!-- ================= ÁREA PRINCIPAL ================= -->
   <div id="main">
     <div class="topbar">
       <div class="topbar-left"><span class="topbar-title" id="topbar-title">Inicio · Calendario</span><span class="topbar-badge" id="topbar-badge">Temporada 2026</span></div>
@@ -83,6 +86,7 @@
 
     <div id="content-area">
 
+      <!-- PANEL INICIO -->
       <div class="panel active" id="panel-home">
         <div class="home-grid">
           <div class="cal-card">
@@ -98,6 +102,7 @@
         </div>
       </div>
 
+      <!-- PANEL DIA A DIA -->
       <div class="panel" id="panel-ent-dia">
         <div class="ent-dia-top-grid">
           <div class="ent-dia-cal-card">
@@ -116,6 +121,7 @@
         <div id="ent-dia-players-area"></div>
       </div>
 
+      <!-- PANEL ENTRENAMIENTO -->
       <div class="panel" id="panel-entrenamiento">
         <div class="ent-layout">
           <div class="ent-cal-card">
@@ -156,6 +162,7 @@
         <div class="no-data-msg" id="ent-nodata" style="display:none">Seleccioná fechas y jugadores para ver las estadísticas.</div>
       </div>
 
+      <!-- PANEL PARTIDOS -->
       <div class="panel" id="panel-partidos">
         <div id="match-cards-bar" class="match-cards-bar"></div>
         <div style="display:flex; align-items:center; gap:10px; margin:10px 0 4px; flex-wrap:wrap;">
@@ -174,8 +181,36 @@
         </div>
       </div>
 
-      <div class="panel" id="panel-fisico"><div class="coming-soon"><h2>Prep. Física</h2></div></div>
+      <!-- PANEL PREP FISICA -->
+      <div class="panel" id="panel-fisico">
+        <div class="header-title">
+            <h1>PREPARACIÓN FÍSICA</h1>
+            <p>Control de Cargas y Bienestar del Equipo</p>
+        </div>
+        <div style="display:flex; gap:20px; margin-top:30px; flex-wrap:wrap;">
+            
+            <div onclick="fisicoAbrirModal('PRE')" style="flex:1; min-width:250px; background:#fff; border-radius:16px; padding:30px; border:2px solid #e2e8f0; cursor:pointer; transition:0.3s; box-shadow:0 4px 10px rgba(0,0,0,0.05); text-align:center;" onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">
+                <div style="font-size:3rem; margin-bottom:15px;">🔋</div>
+                <h2 style="color:#0f172a; margin:0 0 10px 0;">Carga Previa (Wellness)</h2>
+                <p style="color:#64748b; font-size:0.9rem; margin:0;">¿Cómo llegás hoy? Sueño, fatiga, ánimo y dolor.</p>
+            </div>
+            
+            <div onclick="fisicoAbrirModal('POST')" style="flex:1; min-width:250px; background:#fff; border-radius:16px; padding:30px; border:2px solid #e2e8f0; cursor:pointer; transition:0.3s; box-shadow:0 4px 10px rgba(0,0,0,0.05); text-align:center;" onmouseover="this.style.borderColor='#16a34a'; this.style.transform='translateY(-4px)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">
+                <div style="font-size:3rem; margin-bottom:15px;">🔥</div>
+                <h2 style="color:#0f172a; margin:0 0 10px 0;">Carga Posterior (RPE)</h2>
+                <p style="color:#64748b; font-size:0.9rem; margin:0;">¿Cómo fue la sesión? Esfuerzo percibido por el jugador.</p>
+            </div>
+
+            <div onclick="fisicoAbrirModal('STAFF')" style="flex:1; min-width:250px; background:#fff; border-radius:16px; padding:30px; border:2px solid #e2e8f0; cursor:pointer; transition:0.3s; box-shadow:0 4px 10px rgba(0,0,0,0.05); text-align:center;" onmouseover="this.style.borderColor='#8b5cf6'; this.style.transform='translateY(-4px)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">
+                <div style="font-size:3rem; margin-bottom:15px;">📋</div>
+                <h2 style="color:#0f172a; margin:0 0 10px 0;">Carga Staff (PF)</h2>
+                <p style="color:#64748b; font-size:0.9rem; margin:0;">Volumen e intensidad general planificada por el CT.</p>
+            </div>
+
+        </div>
+      </div>
       
+      <!-- PANEL KINESIOLOGIA -->
       <div class="panel" id="panel-kinesiologia">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h2>🩺 Kinesiología</h2>
@@ -185,11 +220,12 @@
           </div>
         </div>
         <div class="kine-summary" id="kine-summary"></div>
-        <div class="kine-top-grid"><div class="kine-cal-card"><div class="kine-cal-nav"><button class="kine-cal-btn" onclick="kineCalNav(-1)">&#8249;</button><span id="kine-cal-title" class="kine-cal-title-txt"></span><button class="kine-cal-btn" onclick="kineCalNav(1)">&#8250;</button></div><div id="kine-cal-grid"></div><div id="kine-day-popup" class="kine-day-popup" style="display:none"></div></div><div class="kine-role-card-section"><div class="kine-section-title">Atenciones por Rol</div><div id="kine-role-grid" class="kine-role-grid"></div></div></div>
+        <div class="kine-top-grid"><div class="kine-cal-card"><div class="kine-cal-nav"><button class="kine-cal-btn" onclick="kineCalNav(-1)">&#8249;</button><span id="kine-cal-title" class="kine-cal-title-txt"></span><button class="kine-cal-btn" onclick="kineCalNav(1)">&#8250;</button></div><div id="kine-cal-grid"></div></div><div class="kine-role-card-section"><div class="kine-section-title">Atenciones por Rol</div><div id="kine-role-grid" class="kine-role-grid"></div></div></div>
         <div id="kine-loading" class="kine-loading-msg">Cargando datos kinesiológicos…</div>
         <div id="kine-body" class="kine-body"></div>
       </div>
 
+      <!-- PANEL CONFIGURACION -->
       <div class="panel" id="panel-config">
         <h2 id="config-main-title">⚙️ Centro de Configuración</h2>
         <p style="color: var(--sub); font-size: 0.85rem; margin-bottom: 20px;">Gestioná la información base de la selección guardada en Firebase.</p>
@@ -203,7 +239,6 @@
         <div id="config-sections" style="display:none; margin-top:20px;">
             <button class="btn-back-hub" onclick="backToHub()">⬅️ Volver al selector</button>
             <div class="config-grid">
-                
                 <div id="sec-players" class="config-card" style="display:none">
                     <h3>👥 Carga de Jugadores</h3>
                     <input type="hidden" id="edit-player-id"> <div class="config-form-group"><label>Nombre Completo</label><input type="text" id="conf-p-name" class="config-input" placeholder="Ej: DE CECCO L"></div>
@@ -236,12 +271,16 @@
         </div>
       </div>
 
+      <!-- PANEL PERFIL INDIVIDUAL -->
       <div class="panel" id="panel-perfil"><div class="coming-soon"><div class="cs-icon">👤</div><h2>Perfil Individual</h2></div></div>
 
     </div>
   </div>
 </div>
 
+<!-- ================= ZONA DE MODALES (VENTANAS EMERGENTES) ================= -->
+
+<!-- Modal Principal Calendario -->
 <div id="popup-overlay" onclick="closePopup()"></div>
 <div id="day-popup">
   <div class="popup-header">
@@ -253,22 +292,63 @@
   </div>
   <div class="popup-body" id="popup-body"></div>
 </div>
+<div id="kine-day-popup" class="kine-day-popup" style="display:none"></div>
 
+<!-- Modal Kinesiologia Ingreso -->
+<div id="modal-kine" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(3px);">
+    <div style="background:var(--card, #fff); padding:24px; border-radius:12px; width:90%; max-width:400px;">
+        <h3 id="kine-modal-title"></h3><input type="hidden" id="edit-doc-id">
+        <label>Fecha</label><input type="date" id="kine-fecha" class="config-input">
+        <label>Turno</label><select id="kine-turno" class="config-input"><option value="Mañana">Mañana</option><option value="Tarde">Tarde</option><option value="Noche">Noche</option></select>
+        <label>Jugador</label><select id="kine-jugador" class="config-input"></select>
+        <label>Intervención</label><input type="text" id="kine-intervencion" class="config-input">
+        <label>Observaciones</label><textarea id="kine-obs" rows="3" class="config-input"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:10px;"><button onclick="cerrarModalKine()" class="config-btn-save" style="background:#e2e8f0;color:#333;width:auto">Cancelar</button><button id="btn-guardar-kine" onclick="guardarKinesio()" class="config-btn-save" style="width:auto">Guardar</button></div>
+    </div>
+</div>
+
+<!-- Modal Kinesiologia Admin -->
+<div id="modal-admin-kine" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9998; align-items:center; justify-content:center; backdrop-filter: blur(3px);">
+    <div style="background:var(--card, #fff); padding:24px; border-radius:12px; width:95%; max-width:800px; height: 80vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin:0; color:var(--celeste-dark); font-weight:900;">⚙️ Historial Firebase</h3><button onclick="cerrarAdminKine()" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">✕</button></div>
+        <div style="flex: 1; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;"><thead style="background: #f8fafc; position: sticky; top: 0;"><tr><th style="text-align:left; padding:12px;">Fecha</th><th style="text-align:left; padding:12px;">Jugador</th><th style="text-align:left; padding:12px;">Intervención</th><th style="text-align:center; padding:12px;">Acciones</th></tr></thead><tbody id="admin-kine-list"></tbody></table></div>
+    </div>
+</div>
+
+<!-- Modal Fisico (Wellness / RPE) -->
+<div id="fisico-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+    <div id="fisico-modal-content" style="background:#fff; width:90%; max-width:800px; max-height:90vh; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); overflow-y:auto; position:relative; display:flex; flex-direction:column;">
+        <!-- El contenido se inyecta por JS -->
+    </div>
+</div>
+
+<!-- Modal de Planificación -->
+<div id="plan-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+    <div id="plan-modal-content" style="background:#fff; width:90%; max-width:500px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); overflow:hidden; display:flex; flex-direction:column;">
+        <!-- El contenido se inyecta por JS -->
+    </div>
+</div>
+
+
+<!-- ================= SCRIPTS ================= -->
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
 
-<script src="app.js?v=70"></script>
-<script src="core.js?v=70"></script>
-<script src="config.js?v=70"></script> <script src="match_popup.js?v=70"></script>
-<script src="calendario.js?v=70"></script>
-<script src="entrenamiento.js?v=70"></script>
-<script src="diadia.js?v=70"></script>
-<script src="kinesiologia.js?v=70"></script>
-<script src="partidos.js?v=70"></script>
+<script src="app.js?v=71"></script>
+<script src="core.js?v=71"></script>
+<script src="config.js?v=71"></script> 
+<script src="match_popup.js?v=71"></script>
+<script src="calendario.js?v=71"></script>
+<script src="entrenamiento.js?v=71"></script>
+<script src="diadia.js?v=71"></script>
+<script src="kinesiologia.js?v=71"></script>
+<script src="partidos.js?v=71"></script>
+<script src="fisico.js?v=71"></script>
+<script src="planificacion.js?v=71"></script>
 
 <script>
-    // INICIALIZACIÓN BÁSICA (Solo Kinesiología queda acá, lo demás va a config.js)
+    // INICIALIZACIÓN BÁSICA FIREBASE
     var firebaseConfig = {
         apiKey: "AIzaSyC_HRtcl4qMPnPYYLfnwl19SQCYTiLbCR4",
         authDomain: "dashboard-seleccion.firebaseapp.com",
@@ -281,11 +361,14 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
     var storage = firebase.storage();
+    window.database = firebase.database ? firebase.database() : null; // Si usas Realtime DB
+    
     var FULL_DATA_KINE = [];
 
     document.addEventListener('DOMContentLoaded', () => {
         if(typeof initKineSnapshots === 'function') initKineSnapshots();
         if(typeof initConfigSnapshots === 'function') initConfigSnapshots(); // Llama a la función que está en config.js
+        if(typeof initPlanSnapshots === 'function') initPlanSnapshots(); 
     });
 
     function initKineSnapshots() {
@@ -299,6 +382,21 @@
             if (typeof kineRender === 'function') kineRender();
             if (typeof renderCalendar === 'function') renderCalendar();
             if (document.getElementById('modal-admin-kine').style.display === 'flex') renderAdminList();
+        });
+    }
+
+    // --- SNAPSHOT DE PLANIFICACIÓN ---
+    function initPlanSnapshots() {
+        db.collection("planificacion").onSnapshot(snap => {
+            window.RAW_PLAN = {};
+            snap.forEach(doc => {
+                window.RAW_PLAN[doc.id] = doc.data().texto;
+            });
+            
+            if(typeof planPopulateList === 'function' && document.getElementById('plan-modal-overlay').style.display === 'flex') {
+                planPopulateList();
+            }
+            if(typeof syncGlobalState === 'function') syncGlobalState();
         });
     }
 
@@ -327,22 +425,5 @@
     function eliminarKine(id){ if(confirm("¿Eliminar?")) db.collection("kinesiologia").doc(id).delete(); }
 </script>
 
-<div id="modal-kine" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(3px);">
-    <div style="background:var(--card, #fff); padding:24px; border-radius:12px; width:90%; max-width:400px;">
-        <h3 id="kine-modal-title"></h3><input type="hidden" id="edit-doc-id">
-        <label>Fecha</label><input type="date" id="kine-fecha" class="config-input">
-        <label>Turno</label><select id="kine-turno" class="config-input"><option value="Mañana">Mañana</option><option value="Tarde">Tarde</option><option value="Noche">Noche</option></select>
-        <label>Jugador</label><select id="kine-jugador" class="config-input"></select>
-        <label>Intervención</label><input type="text" id="kine-intervencion" class="config-input">
-        <label>Observaciones</label><textarea id="kine-obs" rows="3" class="config-input"></textarea>
-        <div style="display:flex; justify-content:flex-end; gap:10px;"><button onclick="cerrarModalKine()" class="config-btn-save" style="background:#e2e8f0;color:#333;width:auto">Cancelar</button><button id="btn-guardar-kine" onclick="guardarKinesio()" class="config-btn-save" style="width:auto">Guardar</button></div>
-    </div>
-</div>
-<div id="modal-admin-kine" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9998; align-items:center; justify-content:center; backdrop-filter: blur(3px);">
-    <div style="background:var(--card, #fff); padding:24px; border-radius:12px; width:95%; max-width:800px; height: 80vh; display: flex; flex-direction: column;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin:0; color:var(--celeste-dark); font-weight:900;">⚙️ Historial Firebase</h3><button onclick="cerrarAdminKine()" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">✕</button></div>
-        <div style="flex: 1; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;"><thead style="background: #f8fafc; position: sticky; top: 0;"><tr><th style="text-align:left; padding:12px;">Fecha</th><th style="text-align:left; padding:12px;">Jugador</th><th style="text-align:left; padding:12px;">Intervención</th><th style="text-align:center; padding:12px;">Acciones</th></tr></thead><tbody id="admin-kine-list"></tbody></table></div>
-    </div>
-</div>
 </body>
 </html>

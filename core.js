@@ -56,9 +56,9 @@ function switchPanel(name,el){
 
 function parseSheetDate(val){
   if(!val) return '';
-  if(val instanceof Date) return val.toISOString().substring(0,10);
-  if(typeof val==='number') return new Date(Math.round((val-25569)*86400*1000)).toISOString().substring(0,10);
-  var s=String(val).trim();
+  if(val instanceof Date) { return val.getFullYear() + '-' + String(val.getMonth()+1).padStart(2,'0') + '-' + String(val.getDate()).padStart(2,'0'); }
+  if(typeof val==='number') { var d = new Date(Math.round((val-25569)*86400*1000)); return d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') + '-' + String(d.getUTCDate()).padStart(2,'0'); }
+  var s=String(val).trim().split(' ')[0];
   if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
   var p=s.split(/[\/\-]/);
   if(p.length===3) { var y = p[2].length===2 ? '20'+p[2] : p[2]; var m = p[1].padStart(2,'0'); var d = p[0].padStart(2,'0'); return y+'-'+m+'-'+d; }
@@ -134,7 +134,7 @@ function parseMatchSheetAdvanced(ws, tabType) {
     }
 }
 
-// ── SINCRONIZADOR GLOBAL (Une Drive y Firebase) ──
+// ── SINCRONIZADOR GLOBAL ──
 window.syncGlobalState = function() {
     ENT_DATES_WITH_DATA.clear();
     MATCH_DATES_WITH_DATA.clear();
@@ -147,17 +147,61 @@ window.syncGlobalState = function() {
         window.CONF_MATCHES.forEach(m => { 
             if(m.DATE) { 
                 ENT_DATES_WITH_DATA.add(m.DATE); MATCH_DATES_WITH_DATA.add(m.DATE);
-                window.RAW_MATCHES.push({DATE: m.DATE, TORNEO: m.TORNEO || '', RIVAL: m.RIVAL, UBICACION: '', BANDERA: m.BANDERA || '', RESULTADO: ''});
-                window.RAW_MATCH_LINKS.push({DATE: m.DATE, RIVAL: m.RIVAL, BANDERA: m.BANDERA || '', VIDEO: '', PDF: '', TABLA_P2: '', RESULTADO: ''});
+                
+                var excelLinks = (window.EXCEL_MATCH_LINKS && window.EXCEL_MATCH_LINKS[m.DATE]) ? window.EXCEL_MATCH_LINKS[m.DATE] : {};
+
+                window.RAW_MATCHES.push({
+                    DATE: m.DATE, TORNEO: m.TORNEO || '', RIVAL: m.RIVAL, UBICACION: '', BANDERA: m.BANDERA || '', RESULTADO: m.RESULTADO || '',
+                    VIDEO: excelLinks.VIDEO || '', TABLA_P2: excelLinks.TABLA_P2 || ''
+                });
+
+                window.RAW_MATCH_LINKS.push({
+                    DATE: m.DATE, RIVAL: m.RIVAL, BANDERA: m.BANDERA || '', VIDEO: excelLinks.VIDEO || '', PDF: '', TABLA_P2: excelLinks.TABLA_P2 || '', RESULTADO: m.RESULTADO || ''
+                });
+
+                if(excelLinks.VIDEO) {
+                    if(!window.RAW_VIDEOS.some(v => v.DATE === m.DATE && v.LINK === excelLinks.VIDEO)) {
+                        window.RAW_VIDEOS.push({DATE: m.DATE, TIPO: 'PARTIDO', LINK: excelLinks.VIDEO});
+                    }
+                }
             } 
         });
     }
 
-    if(typeof window.RAW_KINE !== 'undefined') {
-        window.RAW_KINE.forEach(k => { if(k.DATE) ENT_DATES_WITH_DATA.add(k.DATE); });
+    if(typeof window.RAW_KINE !== 'undefined') { window.RAW_KINE.forEach(k => { if(k.DATE) ENT_DATES_WITH_DATA.add(k.DATE); }); }
+
+    if(typeof window.RAW_VIDEOS !== 'undefined') {
+        window.RAW_VIDEOS.forEach(v => {
+            if(v.DATE) ENT_DATES_WITH_DATA.add(v.DATE);
+        });
     }
 
     if(typeof buildCalendarEvents==='function') buildCalendarEvents();
+
+    // 🌟 LA MAGIA DE LA PLANIFICACIÓN (Corregido el "undefined")
+    if(typeof window.RAW_PLAN !== 'undefined') {
+        Object.keys(window.RAW_PLAN).forEach(d => {
+            if(typeof window.CAL_EVENTS !== 'undefined') {
+                if(!window.CAL_EVENTS[d]) window.CAL_EVENTS[d] = [];
+                
+                var ev = window.CAL_EVENTS[d].find(e => e.type === 'train' || e.type === 'match');
+                if(ev) {
+                    ev.note = window.RAW_PLAN[d];
+                    // Si el evento no tenía título (raro, pero posible), se lo ponemos
+                    if(!ev.title) ev.title = 'PLANIFICACIÓN'; 
+                } else {
+                    // Creamos el evento nuevo asegurándonos de pasarle la propiedad 'title'
+                    window.CAL_EVENTS[d].push({ 
+                        type: 'train', 
+                        title: 'PLANIFICACIÓN', 
+                        note: window.RAW_PLAN[d] 
+                    });
+                }
+            }
+            ENT_DATES_WITH_DATA.add(d); 
+        });
+    }
+
     if(typeof entRenderPlayerSelector==='function') entRenderPlayerSelector();
     if(typeof entRenderMiniCal==='function') entRenderMiniCal();
     if(typeof matchRenderPlayerSelector==='function') matchRenderPlayerSelector();
@@ -184,32 +228,52 @@ function loadEntData(){
     if(wsFund){ var rawRows=XLSX.utils.sheet_to_json(wsFund,{header:1,defval:null}); for(var i=3;i<rawRows.length;i++){ var r=rawRows[i]; if(!r[0]||!r[1]) continue; var ds=parseSheetDate(r[0]); if(!ds) continue; RAW_FUND.push({ DATE:ds, JUGADOR:smartPlayerMap(r[1]), SAQ_TOT:+(r[2]||0), SAQ_ACE:+(r[3]||0), SAQ_ERR:+(r[4]||0), SAQ_FOUL:+(r[5]||0), SAQ_EFF: r[6]==='----'?null:+(r[6]||0), REC_TOT:+(r[7]||0), REC_ERR:+(r[8]||0), REC_PERF:+(r[9]||0), REC_POS:+(r[10]||0), REC_NEG:+(r[11]||0), ATQ_TOT:+(r[12]||0), ATQ_KILL:+(r[13]||0), ATQ_ERR:+(r[14]||0), ATQ_BLK:+(r[15]||0), ATQ_PCT: r[16]==='----'?null:+(r[16]||0), ATQ_EFF: r[17]==='----'?null:+(r[17]||0), APR_TOT:+(r[18]||0), APR_KILL:+(r[19]||0), APR_ERR:+(r[20]||0), APR_BLK:+(r[21]||0), APR_PCT: r[22]==='----'?null:+(r[22]||0), APR_EFF: r[23]==='----'?null:+(r[23]||0), CTR_TOT:+(r[24]||0), CTR_KILL:+(r[25]||0), CTR_ERR:+(r[26]||0), CTR_BLK:+(r[27]||0), CTR_PCT: r[28]==='----'?null:+(r[28]||0), CTR_EFF: r[29]==='----'?null:+(r[29]||0), BLK_TOT:+(r[30]||0), DEF_TOT:+(r[31]||0), DEF_ERR:+(r[32]||0) }); } }
 
     var wsArm=findSheet(wb1, ['ARMADORES']);
-    if(wsArm){ 
-        var rawArm=XLSX.utils.sheet_to_json(wsArm,{header:1,defval:null}); 
-        for(var i=3;i<rawArm.length;i++){ 
-            var r=rawArm[i]; 
-            if(!r[0]||!r[1]) continue; 
-            // 🌟 LECTURA CORREGIDA SEGÚN LA TABLA DEL EXCEL 🌟
-            RAW_ARM.push({ 
-                DATE:parseSheetDate(r[0]), 
-                ARMADOR:smartPlayerMap(r[1]), 
-                AG_TOT:+(r[2]||0), 
-                AG_EFF:+(r[3]||0), 
-                AG_PCT_KILL:+(r[4]||0), 
-                PP_TOT:+(r[10]||0), 
-                PP_EFF:+(r[11]||0), 
-                PP_PCT_KILL:+(r[12]||0), 
-                TR_TOT:+(r[18]||0), 
-                TR_EFF:+(r[19]||0), 
-                TR_PCT_KILL:+(r[20]||0) 
-            }); 
-        } 
-    }
+    if(wsArm){ var rawArm=XLSX.utils.sheet_to_json(wsArm,{header:1,defval:null}); for(var i=3;i<rawArm.length;i++){ var r=rawArm[i]; if(!r[0]||!r[1]) continue; RAW_ARM.push({ DATE:parseSheetDate(r[0]), ARMADOR:smartPlayerMap(r[1]), AG_TOT:+(r[2]||0), AG_EFF:+(r[3]||0), AG_PCT_KILL:+(r[4]||0), PP_TOT:+(r[10]||0), PP_EFF:+(r[11]||0), PP_PCT_KILL:+(r[12]||0), TR_TOT:+(r[18]||0), TR_EFF:+(r[19]||0), TR_PCT_KILL:+(r[20]||0) }); } }
 
     var wsVid=findSheet(wb1, ['VIDEOS']);
     if(wsVid){ var rawVid=XLSX.utils.sheet_to_json(wsVid,{header:1,defval:null}); for(var i=1;i<rawVid.length;i++){ if(rawVid[i]&&rawVid[i][0]) RAW_VIDEOS.push({DATE:parseSheetDate(rawVid[i][0]), TIPO:String(rawVid[i][1]||''), LINK:String(rawVid[i][2]||'')}); } }
 
     var wbMatch=XLSX.read(new Uint8Array(bufs[1]),{type:'array',cellDates:true});
+
+    window.EXCEL_MATCH_LINKS = {};
+    var wsMatchVid = findSheet(wbMatch, ['VIDEO', 'VIDEOS', 'LINKS']) || findSheet(wb1, ['VIDEO', 'VIDEOS', 'LINKS']); 
+    
+    if(wsMatchVid) {
+        var rawMVid = XLSX.utils.sheet_to_json(wsMatchVid, {header:1, defval:null, raw: false});
+        var startRow = -1, fIdx = -1, vIdx = -1, p2Idx = -1;
+
+        for(var i=0; i<Math.min(10, rawMVid.length); i++) {
+            var rowStr = rawMVid[i].join(' ').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if(rowStr.includes('FECHA') || rowStr.includes('LINK') || rowStr.includes('VIDEO')) {
+                startRow = i;
+                var head = rawMVid[i].map(h => String(h||'').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim());
+                fIdx = head.findIndex(h => h.includes('FECHA') || h === 'DATE');
+                vIdx = head.findIndex(h => h.includes('LINK VIDEO') || h === 'VIDEO' || h.includes('LINK'));
+                p2Idx = head.findIndex(h => h.includes('TABLA P2') || h.includes('P2') || h === 'PDF');
+                break;
+            }
+        }
+
+        if(fIdx === -1) fIdx = 0;
+        if(vIdx === -1) vIdx = 3;
+        if(p2Idx === -1) p2Idx = 4;
+
+        if(startRow >= 0) {
+            for(var i = startRow + 1; i < rawMVid.length; i++) {
+                var r = rawMVid[i];
+                if(r && r[fIdx]) {
+                    var mDate = parseSheetDate(r[fIdx]);
+                    if(mDate) {
+                        window.EXCEL_MATCH_LINKS[mDate] = {
+                            VIDEO: r[vIdx] ? String(r[vIdx]).trim() : '',
+                            TABLA_P2: r[p2Idx] ? String(r[p2Idx]).trim() : ''
+                        };
+                    }
+                }
+            }
+        }
+    }
+
     var wsMSaqRec=findSheet(wbMatch, ['SAQUE & RECEPCION', 'SAQUE Y RECEPCION', 'RECEPCION', 'SAQUE - RECEPCION']);
     if(wsMSaqRec) parseMatchSheetAdvanced(wsMSaqRec, 'SAQ_REC');
     
