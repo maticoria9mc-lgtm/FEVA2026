@@ -335,17 +335,17 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
 
-<script src="app.js?v=71"></script>
-<script src="core.js?v=71"></script>
-<script src="config.js?v=71"></script> 
-<script src="match_popup.js?v=71"></script>
-<script src="calendario.js?v=71"></script>
-<script src="entrenamiento.js?v=71"></script>
-<script src="diadia.js?v=71"></script>
-<script src="kinesiologia.js?v=71"></script>
-<script src="partidos.js?v=71"></script>
-<script src="fisico.js?v=71"></script>
-<script src="planificacion.js?v=71"></script>
+<script src="app.js?v=72"></script>
+<script src="core.js?v=72"></script>
+<script src="config.js?v=72"></script> 
+<script src="match_popup.js?v=72"></script>
+<script src="calendario.js?v=72"></script>
+<script src="entrenamiento.js?v=72"></script>
+<script src="diadia.js?v=72"></script>
+<script src="kinesiologia.js?v=72"></script>
+<script src="partidos.js?v=72"></script>
+<script src="fisico.js?v=72"></script>
+<script src="planificacion.js?v=72"></script>
 
 <script>
     // INICIALIZACIÓN BÁSICA FIREBASE
@@ -403,11 +403,17 @@
     // --- MODALES KINE ---
     function abrirModalKine(edit = null) {
         var sel = document.getElementById('kine-jugador');
-        if(sel && typeof RAW_PLAYERS !== 'undefined') { sel.innerHTML = '<option value="">Seleccionar Jugador...</option>'; RAW_PLAYERS.forEach(p => sel.innerHTML += `<option value="${p.NAME}">${p.NAME}</option>`); }
+        if(sel && typeof RAW_PLAYERS !== 'undefined') { 
+            sel.innerHTML = '<option value="">Seleccionar Jugador...</option>'; 
+            // 🌟 INYECCIÓN DE LA OPCIÓN EQUIPO COMPLETO 🌟
+            sel.innerHTML += '<option value="EQUIPO COMPLETO">👥 EQUIPO COMPLETO</option>';
+            RAW_PLAYERS.forEach(p => sel.innerHTML += `<option value="${p.NAME}">${p.NAME}</option>`); 
+        }
         if(edit) { document.getElementById('kine-modal-title').textContent="✏️ Editar Atención"; document.getElementById('edit-doc-id').value=edit.id; document.getElementById('kine-fecha').value=edit.DATE; document.getElementById('kine-turno').value=edit.TURNO; document.getElementById('kine-jugador').value=edit.JUGADOR; document.getElementById('kine-intervencion').value=edit.INTERVENCION; document.getElementById('kine-obs').value=edit.OBSERVACIONES; document.getElementById('btn-guardar-kine').textContent="Actualizar"; }
         else { document.getElementById('kine-modal-title').textContent="➕ Nueva Atención"; document.getElementById('edit-doc-id').value=""; document.getElementById('kine-fecha').value=new Date().toISOString().substring(0,10); document.getElementById('kine-turno').value="Mañana"; document.getElementById('kine-intervencion').value=""; document.getElementById('kine-obs').value=""; document.getElementById('btn-guardar-kine').textContent="Guardar"; }
         document.getElementById('modal-kine').style.display='flex';
     }
+    
     function cerrarModalKine(){ document.getElementById('modal-kine').style.display='none'; }
     function guardarKinesio() {
         var id = document.getElementById('edit-doc-id').value;
